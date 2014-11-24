@@ -1,0 +1,1 @@
+{"version":3,"sources":["start.coffee"],"names":[],"mappings":";;AACA,OAAO,CAAC,GAAR,CAAY,kBAAZ,CAAA,CAAA","file":"start.js","sourceRoot":"","sourcesContent":["# Server startup script\nconsole.log \"this still works\""]}
