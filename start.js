@@ -1,5 +1,4 @@
 #!/usr/bin/node
-(function() {
 var YmSmtpStart,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __slice = [].slice;
@@ -13,7 +12,7 @@ YmSmtpStart = (function() {
     this.startHaraka = __bind(this.startHaraka, this);
     this.setupServer = __bind(this.setupServer, this);
     this.checkUsers = __bind(this.checkUsers, this);
-    this.debuglevel = 10;
+    this.debuglevel = 5;
     this.name = 'Youmagine SMTP';
     if (process.getuid() > 1) {
       this.err("You must be root to start " + this.name);
@@ -21,8 +20,11 @@ YmSmtpStart = (function() {
     }
     this.debug(1, "Starting " + this.name + " ");
     this.checkUsers();
-    this.setupServer();
-    this.startHaraka();
+    this.setupServer((function(_this) {
+      return function() {
+        return _this.startHaraka();
+      };
+    })(this));
   }
 
   YmSmtpStart.prototype.checkUsers = function() {
@@ -38,23 +40,26 @@ YmSmtpStart = (function() {
     }
   };
 
-  YmSmtpStart.prototype.setupServer = function() {
-    var rsync, sync;
+  YmSmtpStart.prototype.setupServer = function(callback) {
+    var fs, rsync, sync;
     rsync = require('rsync');
+    fs = require('fs');
     sync = new rsync().flags('ar').source("" + __dirname + "/project/server/").destination("" + __dirname + "/server/");
-    return sync.execute((function(_this) {
+    sync.execute((function(_this) {
       return function(error, code, cmd) {
         if (error != null) {
           _this.err('Failed to sync server configuration', error, code, cmd);
           process.exit(1);
         }
-        return _this.debug(1, "Synced server configuration");
+        _this.debug(1, "Synced server configuration");
+        return callback();
       };
     })(this));
+    return fs.chmod("" + __dirname + "/spool", parseInt("0777", 8));
   };
 
   YmSmtpStart.prototype.startHaraka = function() {
-    var child, config, forever;
+    var Tail, child, config, forever, tail;
     forever = require('forever-monitor');
     config = {
       max: 3,
@@ -66,8 +71,17 @@ YmSmtpStart = (function() {
       errFile: "" + __dirname + "/logs/log.err",
       silent: true
     };
-    if (this.debuglevel > 3) {
+    if (this.debuglevel > 5) {
       config.silent = false;
+    }
+    if (this.debuglevel > 0) {
+      Tail = require('tail').Tail;
+      tail = new Tail("" + __dirname + "/logs/ymsmtp.log");
+      tail.on("line", (function(_this) {
+        return function(data) {
+          return console.error('YmSmtpLog'.green, data);
+        };
+      })(this));
     }
     child = new forever.Monitor("" + __dirname + "/node_modules/Haraka/bin/haraka", config);
     child.on('start', (function(_this) {
@@ -120,7 +134,5 @@ YmSmtpStart = (function() {
 
 new YmSmtpStart();
 
-
-}).call(this);
 
 //# sourceMappingURL=start.map

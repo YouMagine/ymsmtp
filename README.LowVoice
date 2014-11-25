@@ -1,6 +1,10 @@
 ymsmtp - YouMagine SMTP engine
 	Written by Marius Karthaus @ LowVoice.nl for YouMagine
 
+PREREQUISISTES
+	apt-get install nodejs rsync screen npm swaks
+
+
 ABOUT
 	The ymsmtp is a nodeJS based smtp server build on top of the Haraka SMTP server. It is able to process hundreds of concurrent SMTP connections that contain 3D printer jobs. Incomming SMTP messages are parsed based on the rules defined in the code and dealt with accordingly. There is no store-and-forward, all the processing, submitting and error handling is done in one pass. The client will know if the submit succeeded from the protocol response. 
 
