@@ -109,7 +109,7 @@ YmSmtpRcpt = (function() {
       uuid: connection.uuid
     };
     this.log("New message [" + this.data.uuid + "] from " + this.data.from + " for " + this.data.rcpt + " host: " + this.data.ip);
-    next();
+    next(OK);
   }
 
   return YmSmtpRcpt;

@@ -28,8 +28,5 @@ max_unrecognized_commands
 # Youmagine STMP
 rcpt_to.ymsmtp
 
-# Only accept mail for your personal list of hosts
-rcpt_to.in_host_list
-
-# Queue mail via smtp - see config/smtp_forward.ini for where your mail goes
+# Queue mail in the ymqueue (which is actually an email parser and not a real queue)
 ymqueue

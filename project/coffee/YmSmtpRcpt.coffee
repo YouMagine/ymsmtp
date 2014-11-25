@@ -10,4 +10,6 @@ class YmSmtpRcpt
 		@log("New message ["+@data.uuid+"] from "+@data.from+" for "+@data.rcpt+" host: "+@data.ip)
 		# If we want to somehow limit the recipient, from, ip etc we should do that here
 		# for now we just log the information and move on to the queue where the magic happens
-		next()
+
+		# accept the recipient and allow the email to be delivered
+		next(OK)
