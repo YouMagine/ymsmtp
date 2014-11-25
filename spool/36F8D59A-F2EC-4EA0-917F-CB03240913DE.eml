@@ -1,0 +1,13 @@
+Authentication-Results: marius; ; 
+Received: from mail.lowvoice.nl (Unknown [127.0.0.1])
+	by marius (Haraka/2.5.0) with ESMTP id 36F8D59A-F2EC-4EA0-917F-CB03240913DE.1
+	envelope-from <marius@karthaus.nl>;
+	Tue, 25 Nov 2014 21:07:22 +0100
+Date: Tue, 25 Nov 2014 21:07:22 +0100
+To: marius@print.youmagine.com
+From: marius@karthaus.nl
+Subject: test Tue, 25 Nov 2014 21:07:22 +0100
+X-Mailer: swaks v20130209.0 jetmore.org/john/code/swaks/
+
+This is a test mailing
+
