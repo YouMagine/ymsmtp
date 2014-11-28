@@ -96,7 +96,8 @@ YmSmtpLog = (function() {
 
 })();
 
-var YmQueue;
+var YmQueue,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 exports.hook_queue = (function(_this) {
   return function(next, connection) {
@@ -106,23 +107,78 @@ exports.hook_queue = (function(_this) {
 
 YmQueue = (function() {
   function YmQueue(next, connection) {
-    var ws;
+    this.ok = __bind(this.ok, this);
+    this.deny = __bind(this.deny, this);
+    this.parseBodyChildren = __bind(this.parseBodyChildren, this);
+    var emlFileName, ws;
+    this.data = connection.transaction.notes.ym;
     this.log = new YmSmtpLog(this).log;
     this.fs = require('fs');
-    ws = this.fs.createWriteStream(__dirname.replace(/\/[^\/]+\/[^\/]+$/, '') + '/spool/' + connection.uuid + '.eml');
+    this.next = next;
+    emlFileName = __dirname.replace(/\/[^\/]+\/[^\/]+$/, '') + '/spool/' + connection.uuid + '.eml';
+    ws = this.fs.createWriteStream(emlFileName);
+    this.data.addTask(ws);
     ws.on('error', (function(_this) {
       return function(err) {
-        _this.log("Failed to write to spool");
-        return next(DENY, "Failed to write to spool... sorry!");
+        return _this.deny("Failed to write to spool... sorry!");
+        return _this.data.ready(ws);
       };
     })(this));
     ws.once('close', (function(_this) {
       return function() {
-        return next(OK);
+        _this.log("Wrote " + emlFileName);
+        return _this.data.ready(ws);
       };
     })(this));
     connection.transaction.message_stream.pipe(ws);
+    this.data.subject = connection.transaction.body.header.get('subject');
+    this.parseBodyChildren(connection.transaction.body);
+    this.data.setNext((function(_this) {
+      return function() {
+        _this.log(_this.data);
+        return _this.ok;
+      };
+    })(this));
   }
+
+  YmQueue.prototype.parseBodyChildren = function(body) {
+    var c, o, _i, _len, _ref;
+    o = {};
+    o.text = body.bodytext.trim();
+    o.size = o.text.length;
+    o.type = body.header.get('content-type').toLowerCase().replace('\n', ' ').replace(/\s+/, ' ').trim();
+    if (o != null ? o.type.match('multipart/alternative') : void 0) {
+      o = null;
+    }
+    if (o != null ? o.type.match('multipart/mixed') : void 0) {
+      o = null;
+    }
+    if (o != null) {
+      this.data.parts.push(o);
+    }
+    _ref = body.children;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      c = _ref[_i];
+      this.parseBodyChildren(c);
+    }
+    return true;
+  };
+
+  YmQueue.prototype.deny = function(message) {
+    if (message == null) {
+      message = "Sorry but that failed";
+    }
+    this.log(message);
+    return this.next(DENY, message);
+  };
+
+  YmQueue.prototype.ok = function(message) {
+    if (message == null) {
+      message = "That turned out quite well";
+    }
+    this.log(message);
+    return this.next(OK);
+  };
 
   return YmQueue;
 

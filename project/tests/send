@@ -1,0 +1,17 @@
+#!/bin/bash
+echo $1
+
+if [ $1 eq '']
+then
+echo "Supply name of .eml file"
+exit
+fi
+
+if [ -f $1 ] 
+then
+ swaks -h mail.lowvoice.nl -t marius@print.youmagine.com -f marius@karthaus.nl -s localhost -p 25 --data $1 
+else
+ echo "Supply name of .eml file"
+ exit
+fi
+

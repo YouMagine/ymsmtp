@@ -19,14 +19,19 @@ helo.checks
 # see 'haraka -h tls' for config instructions before enabling!
 # tls
 
+
 # Only accept mail where the MAIL FROM domain is resolvable to an MX record
 mail_from.is_resolvable
 
 # Disconnect client if they spew bad SMTP commands at us
 max_unrecognized_commands
 
+
 # Youmagine STMP
 rcpt_to.ymsmtp
 
-# Queue mail via smtp - see config/smtp_forward.ini for where your mail goes
+# get attachments
+ymattach
+
+# Queue mail in the ymqueue (which is actually an email parser and not a real queue)
 ymqueue

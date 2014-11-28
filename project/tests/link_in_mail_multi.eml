@@ -1,0 +1,48 @@
+Received: from smtp5.lowvoice.nl (smtp5.lowvoice.nl [93.174.106.84])
+	by scan5.lowvoice.nl (Postfix) with ESMTP id 2F5B47A3D4
+	for <Marius@Karthaus.nl>; Thu, 27 Nov 2014 12:21:47 +0100 (CET)
+Received: from [192.168.1.42] (541FB2B0.cm-5-8c.dynamic.ziggo.nl [84.31.178.176])
+	by smtp5.lowvoice.nl (Postfix) with ESMTPSA id 179711FEBB
+	for <Marius@Karthaus.nl>; Thu, 27 Nov 2014 11:21:47 +0000 (UTC)
+Message-ID: <5477094A.50900@Karthaus.nl>
+Date: Thu, 27 Nov 2014 12:21:46 +0100
+From: Marius Karthaus <Marius@Karthaus.nl>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:31.0) Gecko/20100101
+ Thunderbird/31.0
+MIME-Version: 1.0
+To: Marius@Karthaus.nl
+Subject: mkult4
+X-LowVoice-nl-MailScanner-Information: Please contact the ISP for more
+ information
+X-LowVoice-nl-MailScanner-ID: 2F5B47A3D4.A1EA6
+X-LowVoice-nl-MailScanner: Found to be clean
+X-LowVoice-nl-MailScanner-From: marius@karthaus.nl
+Return-Path: marius@karthaus.nl
+Content-Type: multipart/alternative;
+	boundary=------------000001090409040501080701
+
+This is a multi-part message in MIME format.
+--------------000001090409040501080701
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+
+https://www.youmagine.com/designs/spinning-tops-orbital-series
+and this is a Ŭnicode char
+
+--------------000001090409040501080701
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 7bit
+
+<html>
+  <head>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000">
+    <a class="moz-txt-link-freetext" href="https://www.youmagine.com/designs/spinning-tops-orbital-series">https://www.youmagine.com/designs/spinning-tops-orbital-series</a> <br>
+    and this is a Ŭnicode char
+  </body>
+</html>
+
+--------------000001090409040501080701--
+

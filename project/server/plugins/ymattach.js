@@ -96,93 +96,67 @@ YmSmtpLog = (function() {
 
 })();
 
-var YmQueue,
+var YmAttachment,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-exports.hook_queue = (function(_this) {
+exports.hook_data = (function(_this) {
   return function(next, connection) {
-    return new YmQueue(next, connection);
+    return new YmAttachment(next, connection);
   };
 })(this);
 
-YmQueue = (function() {
-  function YmQueue(next, connection) {
-    this.ok = __bind(this.ok, this);
-    this.deny = __bind(this.deny, this);
-    this.parseBodyChildren = __bind(this.parseBodyChildren, this);
-    var emlFileName, ws;
-    this.data = connection.transaction.notes.ym;
+YmAttachment = (function() {
+  function YmAttachment(next, connection) {
+    this.attachmentStart = __bind(this.attachmentStart, this);
+    this.connection = connection;
     this.log = new YmSmtpLog(this).log;
     this.fs = require('fs');
     this.next = next;
-    emlFileName = __dirname.replace(/\/[^\/]+\/[^\/]+$/, '') + '/spool/' + connection.uuid + '.eml';
-    ws = this.fs.createWriteStream(emlFileName);
-    this.data.addTask(ws);
-    ws.on('error', (function(_this) {
-      return function(err) {
-        return _this.deny("Failed to write to spool... sorry!");
-        return _this.data.ready(ws);
+    this.connection.transaction.parse_body = 1;
+    this.data = connection.transaction.notes.ym;
+    this.connection.transaction.attachment_hooks((function(_this) {
+      return function(ct, fn, body, stream) {
+        return _this.attachmentStart(ct, fn, body, stream);
       };
     })(this));
-    ws.once('close', (function(_this) {
-      return function() {
-        _this.log("Wrote " + emlFileName);
-        return _this.data.ready(ws);
-      };
-    })(this));
-    connection.transaction.message_stream.pipe(ws);
-    this.data.subject = connection.transaction.body.header.get('subject');
-    this.parseBodyChildren(connection.transaction.body);
-    this.data.setNext((function(_this) {
-      return function() {
-        _this.log(_this.data);
-        return _this.ok;
-      };
-    })(this));
+    this.next();
   }
 
-  YmQueue.prototype.parseBodyChildren = function(body) {
-    var c, o, _i, _len, _ref;
+  YmAttachment.prototype.attachmentStart = function(contentType, fileName, body, stream) {
+    var o, path, ws;
+    stream.connection = this.connection;
+    stream.pause();
+    this.log("Getting attachment " + fileName);
+    path = __dirname.replace(/\/[^\/]+\/[^\/]+$/, '') + '/spool/' + this.connection.uuid + '.' + this.data.attachments.length + '.att';
     o = {};
-    o.text = body.bodytext.trim();
-    o.size = o.text.length;
-    o.type = body.header.get('content-type').toLowerCase().replace('\n', ' ').replace(/\s+/, ' ').trim();
-    if (o != null ? o.type.match('multipart/alternative') : void 0) {
-      o = null;
-    }
-    if (o != null ? o.type.match('multipart/mixed') : void 0) {
-      o = null;
-    }
-    if (o != null) {
-      this.data.parts.push(o);
-    }
-    _ref = body.children;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      c = _ref[_i];
-      this.parseBodyChildren(c);
-    }
-    return true;
+    o.filename = fileName;
+    o.type = contentType;
+    o.path = path;
+    o.saved = null;
+    this.data.attachments.push(o);
+    ws = this.fs.createWriteStream(path);
+    this.data.addTask(ws);
+    ws.on('close', (function(_this) {
+      return function() {
+        _this.log("Saved attachment " + fileName + " to " + path);
+        o.saved = true;
+        return _this.data.ready(ws);
+      };
+    })(this));
+    ws.on('error', (function(_this) {
+      return function(err) {
+        _this.log("Failed to write attachment " + fileName);
+        o.saved = false;
+        return _this.data.ready(ws);
+      };
+    })(this));
+    stream.pipe(ws);
+    return stream.resume();
   };
 
-  YmQueue.prototype.deny = function(message) {
-    if (message == null) {
-      message = "Sorry but that failed";
-    }
-    this.log(message);
-    return this.next(DENY, message);
-  };
-
-  YmQueue.prototype.ok = function(message) {
-    if (message == null) {
-      message = "That turned out quite well";
-    }
-    this.log(message);
-    return this.next(OK);
-  };
-
-  return YmQueue;
+  return YmAttachment;
 
 })();
 
 
-//# sourceMappingURL=ymqueue.map
+//# sourceMappingURL=ymattach.map

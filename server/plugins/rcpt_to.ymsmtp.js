@@ -101,14 +101,57 @@ var YmSmtpRcpt;
 YmSmtpRcpt = (function() {
   function YmSmtpRcpt(haraka, next, connection, params) {
     this.log = new YmSmtpLog(haraka).log;
-    this.data = {
+    connection.transaction.notes.ym = {
       rcpt: params[0].toString(),
       from: connection.transaction.mail_from.toString(),
       ip: connection.remote_ip,
       host: connection.remote_host,
-      uuid: connection.uuid
+      uuid: connection.uuid,
+      parts: [],
+      attachments: [],
+      subject: null,
+      tasks: [],
+      taskErrors: [],
+      next: null
     };
-    this.log("New message [" + this.data.uuid + "] from " + this.data.from + " for " + this.data.rcpt + " host: " + this.data.ip);
+    connection.transaction.notes.ym.addTask = (function(_this) {
+      return function(object) {
+        var len;
+        len = connection.transaction.notes.ym.tasks.push(object);
+        _this.log("Number of tasks is now: " + len);
+        return connection.transaction.notes.ym.tasks.indexOf(object);
+      };
+    })(this);
+    connection.transaction.notes.ym.ready = (function(_this) {
+      return function(object, error) {
+        var i;
+        if (error == null) {
+          error = null;
+        }
+        if (error != null) {
+          taskErrors.push(error);
+        }
+        i = connection.transaction.notes.ym.tasks.indexOf(object);
+        _this.log("task ready:" + i);
+        connection.transaction.notes.ym.tasks = connection.transaction.notes.ym.tasks.filter(function(o) {
+          return o !== object;
+        });
+        _this.log("Number of tasks is now: " + connection.transaction.notes.ym.tasks.length);
+        if (connection.transaction.notes.ym.tasks.length === 0 && (connection.transaction.notes.ym.next != null)) {
+          return connection.transaction.notes.ym.next();
+        }
+      };
+    })(this);
+    connection.transaction.notes.ym.setNext = (function(_this) {
+      return function(next) {
+        _this.log("Receiving final next() function");
+        connection.transaction.notes.ym.next = next;
+        if (connection.transaction.notes.ym.tasks.length === 0) {
+          return connection.transaction.notes.ym.next();
+        }
+      };
+    })(this);
+    this.log("New message [" + connection.transaction.notes.ym.uuid + "] from " + connection.transaction.notes.ym.from + " for " + connection.transaction.notes.ym.rcpt + " host: " + connection.transaction.notes.ym.ip);
     next(OK);
   }
 
